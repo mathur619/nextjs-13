@@ -1,4 +1,17 @@
 import React from 'react'
+import { notFound } from 'next/navigation'
+
+export const dynamicParams = true
+// true by default: if the params are not defined while building, then also it allows them and tries to fetch the data
+// in this case, let's say for ids "1" to "3" pages were build during build as they these ids were returned by the "generateStaticParams" fnc,
+// but if some other id lets say "4" comes in, next will still try to fetch the data and try to render it
+
+export async function generateStaticParams() {
+  const res = await fetch('http://localhost:4000/tickets')
+  const tickets = await res.json()
+
+  return tickets.map((ticket) => ({ id: ticket.id }))
+}
 
 const getTicket = async (id) => {
   const res = await fetch('http://localhost:4000/tickets/' + id, {
@@ -6,6 +19,10 @@ const getTicket = async (id) => {
       revalidate: 60,
     },
   })
+
+  if (!res.ok) {
+    notFound()
+  }
 
   return res.json()
 }
