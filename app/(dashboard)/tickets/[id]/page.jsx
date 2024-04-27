@@ -6,13 +6,6 @@ export const dynamicParams = true
 // in this case, let's say for ids "1" to "3" pages were build during build as they these ids were returned by the "generateStaticParams" fnc,
 // but if some other id lets say "4" comes in, next will still try to fetch the data and try to render it
 
-export async function generateStaticParams() {
-  const res = await fetch('http://localhost:4000/tickets')
-  const tickets = await res.json()
-
-  return tickets.map((ticket) => ({ id: ticket.id }))
-}
-
 const getTicket = async (id) => {
   // imitate delay
   await new Promise((resolve) => setTimeout(resolve, 3000))
@@ -29,6 +22,22 @@ const getTicket = async (id) => {
 
   return res.json()
 }
+
+export async function generateMetadata({ params }) {
+  const ticket = await getTicket(params.id)
+
+  return {
+    title: `${ticket.title} | Dojo Helpdesk`,
+  }
+}
+
+export async function generateStaticParams() {
+  const res = await fetch('http://localhost:4000/tickets')
+  const tickets = await res.json()
+
+  return tickets.map((ticket) => ({ id: ticket.id }))
+}
+
 export default async function Ticket({ params }) {
   const ticket = await getTicket(params.id)
 
